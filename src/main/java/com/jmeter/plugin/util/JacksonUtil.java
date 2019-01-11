@@ -8,6 +8,7 @@ import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -21,14 +22,6 @@ public class JacksonUtil {
     private static final ObjectMapper objectMapper = new ObjectMapper()
             .configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true);
 
-    public static void main(String[] args) {
-        String json = "{\"name\":\"zhangsan\",\"age\":20,\"birthday\":844099200000,\"email\":\"zhangsan@163.com\"}";
-        try {
-            Object value = objectMapper.readValue(json, new TypeReference<Map>(){});
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
     public static Map<String, Object> json2map(String str_json) {
         Map<String, Object> res = null;
         try {
@@ -38,5 +31,12 @@ public class JacksonUtil {
         } catch (JsonSyntaxException e) {
         }
         return res;
+    }
+
+    public static Map<String, Object> String2Map(String arg) {
+        Gson gson = new Gson();
+        Map<String, Object> map = new HashMap<String, Object>();
+        map = gson.fromJson(arg, map.getClass());
+        return map;
     }
 }

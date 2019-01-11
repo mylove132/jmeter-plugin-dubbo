@@ -231,7 +231,6 @@ public class DubboPluginGui extends AbstractSamplerGui {
                 JOptionPane.showMessageDialog(this.getParent(), "请检查zookeeper配置地址", "error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
-
             JOptionPane.showMessageDialog(this.getParent(), "获取注册列表完成", "info", JOptionPane.INFORMATION_MESSAGE);
             Set<String> services = serviceMethods.keySet();
             for (String str : services) {

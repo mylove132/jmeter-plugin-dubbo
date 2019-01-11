@@ -38,14 +38,13 @@ public class RegistryServerSync implements NotifyListener, Serializable {
             Constants.CLASSIFIER_KEY, Constants.ANY_VALUE,
             Constants.CATEGORY_KEY, Constants.PROVIDERS_CATEGORY,
             Constants.ENABLED_KEY, Constants.ANY_VALUE,
-            Constants.CHECK_KEY, String.valueOf(true));
+            Constants.CHECK_KEY, String.valueOf(false));
     private final ConcurrentMap<String, ConcurrentMap<String, Map<String, URL>>>
             registryCache = new ConcurrentHashMap<>();
     /**
      * Make sure ID never changed when the same url notified many times
      */
     private final ConcurrentHashMap<String, String> URL_IDS_MAPPER = new ConcurrentHashMap<>();
-
     public RegistryServerSync() {
     }
 
