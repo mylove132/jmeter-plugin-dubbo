@@ -1,15 +1,11 @@
 package com.jmeter.plugin.gui;
 
-import com.google.gson.Gson;
 import com.jmeter.plugin.dubbo.DubboPlugin;
 import com.jmeter.plugin.util.JacksonUtil;
 import org.apache.jmeter.gui.util.HorizontalPanel;
 import org.apache.jmeter.gui.util.VerticalPanel;
 import org.apache.jmeter.samplers.gui.AbstractSamplerGui;
 import org.apache.jmeter.testelement.TestElement;
-import org.apache.jmeter.testelement.property.AbstractProperty;
-import org.apache.jmeter.testelement.property.JMeterProperty;
-import org.apache.jmeter.testelement.property.MapProperty;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -43,8 +39,8 @@ public class DubboSamplePluginGui extends AbstractSamplerGui {
     //参数值
     private JTextField paramValue;
     private String[] columnNames;
-    private String[] types = new String[]{"java.lang.String", "java.lang.Integter", "java.lang.Double","java.lang.Long",
-                                          "java.lang.Char","java.lang.Short","java.lang.Byte","java.lang.Boolean","java.lang.Float"};
+    private String[] types = new String[]{"java.lang.String", "java.lang.Integter", "java.lang.Double", "java.lang.Long",
+            "java.lang.Char", "java.lang.Short", "java.lang.Byte", "java.lang.Boolean", "java.lang.Float","自定义编辑"};
     private static Map<String, Map<String, String>> maps = new HashMap<>();
 
     public DubboSamplePluginGui() {
@@ -126,6 +122,14 @@ public class DubboSamplePluginGui extends AbstractSamplerGui {
         pp.add(panel, BorderLayout.SOUTH);
         panel.add(new JLabel("参数类型: "));
         paramType = new JComboBox(types);
+        paramType.addItemListener(e -> {
+            Object itemValue = paramType.getSelectedItem();
+            if (itemValue instanceof String && itemValue.equals("自定义编辑")){
+                paramType.setEditable(true);
+            }else{
+                paramType.setEditable(false);
+            }
+        });
         panel.add(paramType);
         panel.add(new JLabel("参数名: "));
         paramName = new JTextField(10);
@@ -160,38 +164,38 @@ public class DubboSamplePluginGui extends AbstractSamplerGui {
             }
         });
         panel.add(delButton);
-        JButton close = new JButton("完成");
-        close.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-
-                maps.clear();
-                int countNum = table.getRowCount();
-                for (int i = 0; i < countNum; i++) {
-                    String type = (String) model.getValueAt(i, 0);
-                    String name = (String) model.getValueAt(i, 1);
-                    String value = (String) model.getValueAt(i, 2);
-                    if (name == null || name.equals("")) {
-                        JOptionPane.showMessageDialog(panel.getParent(), "行数" + (i + 1) + "参数名为空!", "error", JOptionPane.ERROR_MESSAGE);
-                        return;
-                    }
-                    if (type == null || type.equals("")) {
-                        JOptionPane.showMessageDialog(panel.getParent(), "行数" + (i + 1) + "参数类型为空!", "error", JOptionPane.ERROR_MESSAGE);
-                        return;
-                    }
-                    if (value == null || value.equals("")) {
-                        JOptionPane.showMessageDialog(panel.getParent(), "行数" + (i + 1) + "参数值为空!", "error", JOptionPane.ERROR_MESSAGE);
-                        return;
-                    }
-                    Map<String, String> typeValueMap = new HashMap<>();
-                    typeValueMap.put(type, value);
-                    maps.put(name, typeValueMap);
-
-                }
-                JOptionPane.showMessageDialog(panel.getParent(), "接口参数添加完成", "info", JOptionPane.INFORMATION_MESSAGE);
-            }
-        });
-        panel.add(close);
+//        JButton close = new JButton("完成");
+//        close.addActionListener(new ActionListener() {
+//            @Override
+//            public void actionPerformed(ActionEvent e) {
+//
+//                maps.clear();
+//                int countNum = table.getRowCount();
+//                for (int i = 0; i < countNum; i++) {
+//                    String type = (String) model.getValueAt(i, 0);
+//                    String name = (String) model.getValueAt(i, 1);
+//                    String value = (String) model.getValueAt(i, 2);
+//                    if (name == null || name.equals("")) {
+//                        JOptionPane.showMessageDialog(panel.getParent(), "行数" + (i + 1) + "参数名为空!", "error", JOptionPane.ERROR_MESSAGE);
+//                        return;
+//                    }
+//                    if (type == null || type.equals("")) {
+//                        JOptionPane.showMessageDialog(panel.getParent(), "行数" + (i + 1) + "参数类型为空!", "error", JOptionPane.ERROR_MESSAGE);
+//                        return;
+//                    }
+//                    if (value == null || value.equals("")) {
+//                        JOptionPane.showMessageDialog(panel.getParent(), "行数" + (i + 1) + "参数值为空!", "error", JOptionPane.ERROR_MESSAGE);
+//                        return;
+//                    }
+//                    Map<String, String> typeValueMap = new HashMap<>();
+//                    typeValueMap.put(type, value);
+//                    maps.put(name, typeValueMap);
+//
+//                }
+//                JOptionPane.showMessageDialog(panel.getParent(), "接口参数添加完成", "info", JOptionPane.INFORMATION_MESSAGE);
+//            }
+//        });
+//        panel.add(close);
         paramPanel.add(pp);
         return paramPanel;
     }
@@ -250,8 +254,36 @@ public class DubboSamplePluginGui extends AbstractSamplerGui {
         testElement.setProperty(DubboPlugin.DUBBO_REGISTRY_SERVICE, service.getText());
         testElement.setProperty(DubboPlugin.DUBBO_REGISTRY_METHOD, method.getText());
         testElement.setProperty(DubboPlugin.REQUEST_BEAN, requestBean.getText());
-        System.out.println("传递的map值"+maps.toString());
-        testElement.setProperty(DubboPlugin.DUBBO_PARAMS, maps.toString());
+        getMaps();
+        testElement.setProperty(DubboPlugin.DUBBO_PARAMS, JacksonUtil.map2Json(maps));
+    }
+
+    public void getMaps() {
+        maps.clear();
+        int countNum = table.getRowCount();
+        for (int i = 0; i < countNum; i++) {
+            String type = (String) model.getValueAt(i, 0);
+            String name = (String) model.getValueAt(i, 1);
+            String value = (String) model.getValueAt(i, 2);
+            if (name == null || name.equals("")) {
+                JOptionPane.showMessageDialog(this.getParent(), "行数" + (i + 1) + "参数名为空!", "error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            if (type == null || type.equals("")) {
+                JOptionPane.showMessageDialog(this.getParent(), "行数" + (i + 1) + "参数类型为空!", "error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            if (value == null || value.equals("")) {
+                JOptionPane.showMessageDialog(this.getParent(), "行数" + (i + 1) + "参数值为空!", "error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            Map<String, String> typeValueMap = new HashMap<>();
+            typeValueMap.put(type, value);
+            maps.put(name, typeValueMap);
+
+        }
+        JOptionPane.showMessageDialog(this.getParent(), "接口参数添加完成", "info", JOptionPane.INFORMATION_MESSAGE);
+
     }
 
     /**
@@ -292,9 +324,5 @@ public class DubboSamplePluginGui extends AbstractSamplerGui {
      *
      */
 
-    public static void main(String[] args) {
-        Map<String, Object> map = JacksonUtil.String2Map("{java={java.lang.String=\"pkp,plk,lkkk\"}}");
-        System.out.println(map.get("java"));
-    }
 }
 

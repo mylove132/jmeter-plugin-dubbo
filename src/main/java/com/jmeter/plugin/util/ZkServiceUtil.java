@@ -40,9 +40,7 @@ public class ZkServiceUtil {
             referenceConfig.setApplication(applicationConfig);
             referenceConfig.setRegistry(registry);
             referenceConfig.setInterface("com.alibaba.dubbo.registry.RegistryService");
-
             ReferenceConfigCache cache = ReferenceConfigCache.getCache();
-
             RegistryService registryService = (RegistryService) cache.get(referenceConfig);
 
             RegistryServerSync registryServerSync = RegistryServerSync.get(address + "_");
@@ -72,6 +70,7 @@ public class ZkServiceUtil {
         registry.setAddress(address);
         registry.setProtocol("zookeeper");
         registry.setGroup(null);
+        registry.setTimeout(10000);
         ReferenceConfig<GenericService> reference = new ReferenceConfig<GenericService>();
         reference.setApplication(new ApplicationConfig("dubboSample"));
         reference.setInterface(interfaceName);
@@ -90,7 +89,13 @@ public class ZkServiceUtil {
         GenericService service = getGenericService("172.18.4.48:2181","com.noriental.lessonsvr.rservice.ResPackageService");
         Map<String,Object> map = new HashMap<>();
         map.put("id","36019");
-        Object result = service.$invoke("findResPackageDetail",new String[]{"com.noriental.lessonsvr.entity.request.LongRequest"},new Object[]{map});
-        System.out.println(result.toString().contains("success"));
+        Object result = null;
+                try {
+                    service.$invoke("findResPackageDetail", new String[]{"com.noriental.lessonsvr.entity.request.LongRequest"}, new Object[]{map});
+                }catch (Exception e){
+                    System.out.println("zk连接超时");
+                    return;
+                }
+                System.out.println(result.toString().contains("success"));
     }
 }

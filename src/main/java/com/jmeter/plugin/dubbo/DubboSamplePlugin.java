@@ -51,7 +51,7 @@ public class DubboSamplePlugin extends AbstractSampler {
         String requestBean = getPropertyAsString(REQUEST_BEAN);
         String params = getPropertyAsString(DUBBO_PARAMS).trim();
         String reqId = "qa_"+uuid();
-        Map<String, Object> paramsMap = JacksonUtil.json2map(params);
+        Map<String, Object> paramsMap = JacksonUtil.json2Map(params);
         paramsMap.put("reqId",reqId);
         String service = getPropertyAsString(DUBBO_REGISTRY_SERVICE).split(":")[0];
         GenericService genericService = DubboUtil.getGenericService(address, service);

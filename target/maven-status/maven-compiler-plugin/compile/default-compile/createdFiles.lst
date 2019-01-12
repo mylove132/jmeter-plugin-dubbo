@@ -3,7 +3,6 @@ com/jmeter/plugin/gui/DubboSamplePluginGui$1.class
 com/jmeter/plugin/util/DubboUtil.class
 com/jmeter/plugin/util/ZkServiceUtil.class
 com/jmeter/plugin/util/MyComboBoxEditor.class
-com/jmeter/plugin/util/JacksonUtil$1.class
 com/jmeter/plugin/dubbo/ExampleSampler.class
 com/jmeter/plugin/util/TableTest$4.class
 com/jmeter/plugin/gui/DubboSamplePluginGui.class
@@ -19,6 +18,7 @@ com/jmeter/plugin/util/TableTest.class
 com/jmeter/plugin/util/TableTest$1.class
 com/jmeter/plugin/gui/TextfieldComboBoxGui$3.class
 com/jmeter/plugin/util/JAutoCompleteComboBox.class
+com/jmeter/plugin/util/FontCellRenderer.class
 com/jmeter/plugin/util/TableTest$3.class
 com/jmeter/plugin/util/JacksonUtil.class
 com/jmeter/plugin/util/RegistryServerSync.class
@@ -28,7 +28,6 @@ com/jmeter/plugin/gui/DubboSamplePluginGui$2.class
 com/jmeter/plugin/util/JTableDefaultTableModelTest$2.class
 com/jmeter/plugin/gui/TextfieldComboBoxGui$1.class
 com/jmeter/plugin/gui/DubboPluginGui$1.class
-com/jmeter/plugin/gui/DubboSamplePluginGui$4.class
 com/jmeter/plugin/util/JTableDefaultTableModelTest$1.class
 com/jmeter/plugin/gui/TextfieldComboBoxGui$4.class
 com/jmeter/plugin/gui/DubboPluginGui$2.class

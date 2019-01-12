@@ -29,7 +29,7 @@ public class TableTest extends JFrame {
     private JTextField paramName;
     //参数值
     private JTextField paramValue;
-    private String[] types = new String[]{"java.lang.String","java.lang.Integter","java.lang.Double"};
+    private String[] types = new String[]{"java.lang.String","java.lang.Integter","java.lang.Double","编辑"};
     private static Map<String,Map<String,String>> maps = new HashMap<>();
 
     public TableTest(){
@@ -41,7 +41,7 @@ public class TableTest extends JFrame {
         String[][] tableVales = {{}}; //数据
         model = new DefaultTableModel(tableVales, columnNames);
         table = new JTable(model);
-        table.setBackground(Color.pink);
+        table.setBackground(Color.GREEN);
         JScrollPane scrollPane = new JScrollPane(table);   //支持滚动
         getContentPane().add(scrollPane, BorderLayout.CENTER);
         table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);  //单选
@@ -56,6 +56,14 @@ public class TableTest extends JFrame {
         getContentPane().add(panel, BorderLayout.SOUTH);
         panel.add(new JLabel("参数类型: "));
         paramType = new JComboBox(types);
+        paramType.addItemListener(e -> {
+            Object itemvalue = paramType.getSelectedItem();
+            if (itemvalue instanceof String && itemvalue.equals("编辑")){
+                paramType.setEditable(true);
+            }else {
+                paramType.setEditable(false);
+            }
+        });
         panel.add(paramType);
         panel.add(new JLabel("参数名: "));
         paramName = new JTextField(10);
@@ -129,5 +137,17 @@ public class TableTest extends JFrame {
         tableTest.setVisible(true);
 
 
+    }
+}
+
+
+class FontCellRenderer extends DefaultListCellRenderer {
+    public Component getListCellRendererComponent(JList list, Object value,
+                                                  int index, boolean isSelected, boolean cellHasFocus) {
+        JLabel label = (JLabel) super.getListCellRendererComponent(list, value,
+                index, isSelected, cellHasFocus);
+        Font font = new Font((String) value, Font.BOLD, 10);
+        label.setFont(font);
+        return label;
     }
 }

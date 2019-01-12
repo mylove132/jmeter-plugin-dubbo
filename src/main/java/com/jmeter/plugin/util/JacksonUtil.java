@@ -1,5 +1,6 @@
 package com.jmeter.plugin.util;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -22,21 +23,21 @@ public class JacksonUtil {
     private static final ObjectMapper objectMapper = new ObjectMapper()
             .configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true);
 
-    public static Map<String, Object> json2map(String str_json) {
-        Map<String, Object> res = null;
+    public static String map2Json(Map map){
         try {
-            Gson gson = new Gson();
-            res = gson.fromJson(str_json, new TypeToken<Map<String, Object>>() {
-            }.getType());
-        } catch (JsonSyntaxException e) {
+            return objectMapper.writeValueAsString(map);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
         }
-        return res;
+        return null;
     }
 
-    public static Map<String, Object> String2Map(String arg) {
-        Gson gson = new Gson();
-        Map<String, Object> map = new HashMap<String, Object>();
-        map = gson.fromJson(arg, map.getClass());
-        return map;
+    public static Map json2Map(String json){
+        try {
+            return objectMapper.readValue(json, Map.class);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }

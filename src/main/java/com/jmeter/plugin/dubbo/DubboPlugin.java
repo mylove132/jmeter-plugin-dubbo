@@ -76,23 +76,18 @@ public class DubboPlugin extends AbstractSampler {
             return null;
         }
         Map<String, Object> pamMap = new HashMap<>();
-        Map<String, Map<String, Object>> pMap = new HashMap<String, Map<String, Object>>();
+        Map<String, Map<String, String>> pMap = new HashMap<String, Map<String, String>>();
         String params = getPropertyAsString(DUBBO_PARAMS);
         System.out.println("@@@@@@"+params);
-        Map<String, Object> paramMap = new HashMap<String, Object>();
-        paramMap = JacksonUtil.String2Map(params);
-        System.out.println("~~~~~~~~~~~~paramMap"+paramMap);
-        for (String str : paramMap.keySet()) {
-            Map<String, Object> typeMap = (Map<String, Object>) paramMap.get(str);
-            pMap.put(str, typeMap);
-        }
+        pMap = JacksonUtil.json2Map(params);
+        System.out.println("~~~~~~~~~~~~paramMap"+pMap);
 
         for (String name : pMap.keySet()) {
-            Map<String, Object> typeMap = pMap.get(name);
+            Map<String, String> typeMap = pMap.get(name);
             for (String type : typeMap.keySet()) {
                 switch (type) {
                     case "java.lang.String":
-                        String strValue = typeMap.get(type).toString();
+                        String strValue = typeMap.get(type);
                         if (strValue.contains(",")) {
                             List<String> strList = new ArrayList<>();
                             String s[] = strValue.split(",");
@@ -101,11 +96,11 @@ public class DubboPlugin extends AbstractSampler {
                             }
                             pamMap.put(name, strList);
                         } else {
-                            pamMap.put(name, new BigDecimal(typeMap.get(type).toString()).toString());
+                            pamMap.put(name, new BigDecimal(typeMap.get(type)).toString());
                         }
                         break;
                     case "java.lang.Integter":
-                        String intValue = typeMap.get(type).toString();
+                        String intValue = typeMap.get(type);
                         if (intValue.contains(",")) {
                             List<Integer> intList = new ArrayList<>();
                             String s[] = intValue.split(",");
@@ -115,13 +110,13 @@ public class DubboPlugin extends AbstractSampler {
                             }
                             pamMap.put(name, intList);
                         } else {
-                            String value = typeMap.get(type).toString();
+                            String value = typeMap.get(type);
                             int res = Math.round(Float.parseFloat(value));
                             pamMap.put(name, res);
                         }
                         break;
                     case "java.lang.Double":
-                        String doubleValue = typeMap.get(type).toString();
+                        String doubleValue = typeMap.get(type);
                         if (doubleValue.contains(",")) {
                             List<Double> doubleList = new ArrayList<>();
                             String s[] = doubleValue.split(",");
@@ -131,11 +126,11 @@ public class DubboPlugin extends AbstractSampler {
                             }
                             pamMap.put(name, doubleList);
                         } else {
-                            pamMap.put(name, Double.parseDouble(typeMap.get(type).toString()));
+                            pamMap.put(name, Double.parseDouble(typeMap.get(type)));
                         }
                         break;
                     case "java.lang.Byte":
-                        String byteValue = typeMap.get(type).toString();
+                        String byteValue = typeMap.get(type);
                         if (byteValue.contains(",")) {
                             List<Byte> byteList = new ArrayList<>();
                             String s[] = byteValue.split(",");
@@ -145,11 +140,11 @@ public class DubboPlugin extends AbstractSampler {
                             }
                             pamMap.put(name, byteList);
                         } else {
-                            pamMap.put(name, Byte.parseByte(typeMap.get(type).toString()));
+                            pamMap.put(name, Byte.parseByte(typeMap.get(type)));
                         }
                         break;
                     case "java.lang.Short":
-                        String shortValue = typeMap.get(type).toString();
+                        String shortValue = typeMap.get(type);
                         if (shortValue.contains(",")) {
                             List<Short> shortList = new ArrayList<>();
                             String s[] = shortValue.split(",");
@@ -159,14 +154,14 @@ public class DubboPlugin extends AbstractSampler {
                             }
                             pamMap.put(name, shortList);
                         } else {
-                            pamMap.put(name, Short.parseShort(typeMap.get(type).toString()));
+                            pamMap.put(name, Short.parseShort(typeMap.get(type)));
                         }
                         break;
                     case "java.lang.Char":
-                        pamMap.put(name, typeMap.get(type).toString().toCharArray());
+                        pamMap.put(name, typeMap.get(type).toCharArray());
                         break;
                     case "java.lang.Float":
-                        String floatValue = typeMap.get(type).toString();
+                        String floatValue = typeMap.get(type);
                         if (floatValue.contains(",")) {
                             List<Float> floatList = new ArrayList<>();
                             String s[] = floatValue.split(",");
@@ -176,11 +171,11 @@ public class DubboPlugin extends AbstractSampler {
                             }
                             pamMap.put(name, floatList);
                         } else {
-                            pamMap.put(name, Float.parseFloat(typeMap.get(type).toString()));
+                            pamMap.put(name, Float.parseFloat(typeMap.get(type)));
                         }
                         break;
                     case "java.lang.Long":
-                        String longValue = typeMap.get(type).toString();
+                        String longValue = typeMap.get(type);
                         if (longValue.contains(",")) {
                             List<Long> longList = new ArrayList<>();
                             String s[] = longValue.split(",");
@@ -190,7 +185,7 @@ public class DubboPlugin extends AbstractSampler {
                             }
                             pamMap.put(name, longList);
                         } else {
-                            Long lValue = new BigDecimal(typeMap.get(type).toString()).longValue();
+                            Long lValue = new BigDecimal(typeMap.get(type)).longValue();
                             pamMap.put(name, lValue);
                         }
                         break;
@@ -216,7 +211,12 @@ public class DubboPlugin extends AbstractSampler {
         }
         sampleResult.sampleStart();
         System.out.println("开始时间:" + sampleResult.getStartTime());
-        Object result = genericService.$invoke(method, new String[]{requestBean}, new Object[]{pamMap});
+        Object result = null;try {
+            genericService.$invoke(method, new String[]{requestBean}, new Object[]{pamMap});
+        }catch (Exception e){
+            JOptionPane.showMessageDialog(new DubboPluginGui().getParent(), "zk连接异常!", "error", JOptionPane.ERROR_MESSAGE);
+            return null;
+        }
         sampleResult.sampleEnd();
         System.out.println("结束时间:" + sampleResult.getEndTime());
         System.out.println(result);
@@ -259,133 +259,4 @@ public class DubboPlugin extends AbstractSampler {
         String id = UUID.randomUUID().toString().replace("-", "").substring(7, 15);
         return id;
     }
-
-    public static void main(String[] args) {
-        String a = "6.0";
-        System.out.println(new BigDecimal(a).toString());
-        Map<String, Map<String, Object>> pMap = new HashMap<>();
-        Map<String, Object> pamMap = new HashMap<>();
-        Map<String, Object> mp = JacksonUtil.String2Map("{java={java.lang.Long='81951190299,980001991'}, id={java.lang.Integter=10090}}");
-        for (String str : mp.keySet()) {
-            Map<String, Object> m = (Map<String, Object>) mp.get(str);
-            pMap.put(str, m);
-        }
-        System.out.println(pMap);
-
-        for (String name : pMap.keySet()) {
-            Map<String, Object> typeMap = pMap.get(name);
-            for (String type : typeMap.keySet()) {
-                switch (type) {
-                    case "java.lang.String":
-                        String strValue = typeMap.get(type).toString();
-                        if (strValue.contains(",")) {
-                            List<String> strList = new ArrayList<>();
-                            String s[] = strValue.split(",");
-                            for (String str : s) {
-                                strList.add(str);
-                            }
-                            pamMap.put(name, strList);
-                        } else {
-                            pamMap.put(name, typeMap.get(type));
-                        }
-                        break;
-                    case "java.lang.Integter":
-                        String intValue = typeMap.get(type).toString();
-                        if (intValue.contains(",")) {
-                            List<Integer> intList = new ArrayList<>();
-                            String s[] = intValue.split(",");
-                            for (String str : s) {
-                                int res = Math.round(Float.parseFloat(str));
-                                intList.add(res);
-                            }
-                            pamMap.put(name, intList);
-                        } else {
-                            String value = typeMap.get(type).toString();
-                            int res = Math.round(Float.parseFloat(value));
-                            pamMap.put(name, res);
-                        }
-                        break;
-                    case "java.lang.Double":
-                        String doubleValue = typeMap.get(type).toString();
-                        if (doubleValue.contains(",")) {
-                            List<Double> doubleList = new ArrayList<>();
-                            String s[] = doubleValue.split(",");
-                            for (String str : s) {
-                                double res = Double.parseDouble(str);
-                                doubleList.add(res);
-                            }
-                            pamMap.put(name, doubleList);
-                        } else {
-                            pamMap.put(name, Double.parseDouble(typeMap.get(type).toString()));
-                        }
-                        break;
-                    case "java.lang.Byte":
-                        String byteValue = typeMap.get(type).toString();
-                        if (byteValue.contains(",")) {
-                            List<Byte> byteList = new ArrayList<>();
-                            String s[] = byteValue.split(",");
-                            for (String str : s) {
-                                Byte res = Byte.parseByte(str);
-                                byteList.add(res);
-                            }
-                            pamMap.put(name, byteList);
-                        } else {
-                            pamMap.put(name, Byte.parseByte(typeMap.get(type).toString()));
-                        }
-                        break;
-                    case "java.lang.Short":
-                        String shortValue = typeMap.get(type).toString();
-                        if (shortValue.contains(",")) {
-                            List<Short> shortList = new ArrayList<>();
-                            String s[] = shortValue.split(",");
-                            for (String str : s) {
-                                Short res = Short.parseShort(str);
-                                shortList.add(res);
-                            }
-                            pamMap.put(name, shortList);
-                        } else {
-                            pamMap.put(name, Short.parseShort(typeMap.get(type).toString()));
-                        }
-                        break;
-                    case "java.lang.Char":
-                        pamMap.put(name, typeMap.get(type).toString().toCharArray());
-                        break;
-                    case "java.lang.Float":
-                        String floatValue = typeMap.get(type).toString();
-                        if (floatValue.contains(",")) {
-                            List<Float> floatList = new ArrayList<>();
-                            String s[] = floatValue.split(",");
-                            for (String str : s) {
-                                Float res = Float.parseFloat(str);
-                                floatList.add(res);
-                            }
-                            pamMap.put(name, floatList);
-                        } else {
-                            pamMap.put(name, Float.parseFloat(typeMap.get(type).toString()));
-                        }
-                        break;
-                    case "java.lang.Long":
-                        String longValue = typeMap.get(type).toString();
-                        if (longValue.contains(",")) {
-                            List<Long> longList = new ArrayList<>();
-                            String s[] = longValue.split(",");
-                            for (String str : s) {
-                                Long lValue = new BigDecimal(str).longValue();
-                                longList.add(lValue);
-                            }
-                            pamMap.put(name, longList);
-                        } else {
-                            Long lValue = new BigDecimal(typeMap.get(type).toString()).longValue();
-                            pamMap.put(name, lValue);
-                        }
-                        break;
-                    default:
-                        pamMap.put(name, typeMap.get(type));
-                        break;
-                }
-            }
-        }
-        System.out.println(pamMap);
-    }
-
 }
