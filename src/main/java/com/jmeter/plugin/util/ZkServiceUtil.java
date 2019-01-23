@@ -8,11 +8,8 @@ import com.alibaba.dubbo.config.RegistryConfig;
 import com.alibaba.dubbo.config.utils.ReferenceConfigCache;
 import com.alibaba.dubbo.registry.RegistryService;
 import com.alibaba.dubbo.rpc.service.GenericService;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentMap;
 
@@ -25,7 +22,7 @@ import java.util.concurrent.ConcurrentMap;
 public class ZkServiceUtil {
 
 
-    public static Map<String, String[]> getInterfaceMethods(String address) throws Exception {
+    public static Map<String, String[]> getInterfaceMethods(String address){
         Map<String, String[]> serviceMap = new HashMap<>();
         try {
             ApplicationConfig applicationConfig = new ApplicationConfig();
@@ -34,6 +31,7 @@ public class ZkServiceUtil {
             RegistryConfig registry = new RegistryConfig();
             registry.setAddress(address);
             registry.setProtocol("zookeeper");
+            registry.setClient("curator");
             registry.setGroup(null);
 
             ReferenceConfig referenceConfig = new ReferenceConfig();
@@ -60,15 +58,20 @@ public class ZkServiceUtil {
                 }
             }
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            System.out.println("zk连接失败");
+            return null;
         }
         return serviceMap;
     }
 
     public static GenericService getGenericService(String address, String interfaceName) {
+        GenericService genericService = null;
+        try {
         RegistryConfig registry = new RegistryConfig();
         registry.setAddress(address);
+        registry.setClient("curator");
         registry.setProtocol("zookeeper");
+        registry.setCheck(true);
         registry.setGroup(null);
         registry.setTimeout(10000);
         ReferenceConfig<GenericService> reference = new ReferenceConfig<GenericService>();
@@ -80,22 +83,19 @@ public class ZkServiceUtil {
         reference.setGroup(null);
         reference.setRegistry(registry);
         reference.setGeneric(true);
-        GenericService genericService = reference.get();
+        genericService = reference.get();
+        }catch (Exception e){
+            System.out.println("zk连接异常，请检查zk地址！");
+            return null;
+        }
         return genericService;
     }
-    public static void main(String[] args) throws IOException, ClassNotFoundException, IllegalAccessException, InstantiationException {
-        final ObjectMapper objectMapper = new ObjectMapper()
-                .configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true);
-        GenericService service = getGenericService("172.18.4.48:2181","com.noriental.lessonsvr.rservice.ResPackageService");
-        Map<String,Object> map = new HashMap<>();
-        map.put("id","36019");
-        Object result = null;
-                try {
-                    service.$invoke("findResPackageDetail", new String[]{"com.noriental.lessonsvr.entity.request.LongRequest"}, new Object[]{map});
-                }catch (Exception e){
-                    System.out.println("zk连接超时");
-                    return;
-                }
-                System.out.println(result.toString().contains("success"));
+
+    public static void main(String[] args) {
+        GenericService genericService = getGenericService("172.18.4.48:2181", "com.noriental.adminsvr.service.teaching.ChapterService");
+        Map<String,Object> map = new HashMap();
+        map.put("entity","200,201,202");
+        Object result = genericService.$invoke("findByIds", new String[]{"com.noriental.adminsvr.request.RequestEntity"}, new Object[]{map});
+        System.out.println(result);
     }
 }
